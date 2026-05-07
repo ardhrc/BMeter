@@ -1,5 +1,5 @@
 import { Card } from "@/components/ui/card";
-import { TrendingUp, TrendingDown } from "lucide-react";
+import { TrendingUp, TrendingDown, Zap } from "lucide-react";
 
 interface Trade {
   timeframe: string;
@@ -13,14 +13,20 @@ interface Trade {
 
 interface TradeUpdatesProps {
   trades: Trade[];
+  wsActive?: boolean;
 }
 
-export default function TradeUpdates({ trades }: TradeUpdatesProps) {
+export default function TradeUpdates({ trades, wsActive = false }: TradeUpdatesProps) {
   return (
     <Card className="bg-card border-border p-4 h-full flex flex-col">
       <div className="flex items-center gap-2 mb-4">
-        <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+        <div className={`w-2 h-2 rounded-full ${wsActive ? "bg-green-500 animate-pulse" : "bg-yellow-500 animate-pulse"}`}></div>
         <h2 className="text-lg font-semibold">Live Trade Updates</h2>
+        {wsActive && (
+          <div className="ml-auto" title="WebSocket Active">
+            <Zap className="w-4 h-4 text-cyan-500" />
+          </div>
+        )}
       </div>
 
       <div className="flex-1 overflow-y-auto space-y-4">
@@ -39,7 +45,7 @@ export default function TradeUpdates({ trades }: TradeUpdatesProps) {
               <div className="flex items-center gap-2">
                 <div className="flex-1 bg-gray-700 rounded h-6 overflow-hidden">
                   <div
-                    className="bg-green-500 h-full flex items-center justify-end pr-2 transition-all"
+                    className="bg-green-500 h-full flex items-center justify-end pr-2 transition-all duration-300"
                     style={{ width: `${trade.buyPct}%` }}
                   >
                     <span className="text-xs font-bold text-white">{trade.buyPct.toFixed(1)}%</span>
@@ -54,7 +60,7 @@ export default function TradeUpdates({ trades }: TradeUpdatesProps) {
               <div className="flex items-center gap-2">
                 <div className="flex-1 bg-gray-700 rounded h-6 overflow-hidden">
                   <div
-                    className="bg-red-500 h-full flex items-center justify-end pr-2 transition-all"
+                    className="bg-red-500 h-full flex items-center justify-end pr-2 transition-all duration-300"
                     style={{ width: `${trade.sellPct}%` }}
                   >
                     <span className="text-xs font-bold text-white">{trade.sellPct.toFixed(1)}%</span>
