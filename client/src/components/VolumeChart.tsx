@@ -1,13 +1,15 @@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { Card } from "@/components/ui/card";
+import { PricePoint } from "@/hooks/usePriceHistory";
 
 interface VolumeChartProps {
   timeframe: string;
+  data?: PricePoint[];
 }
 
-export default function VolumeChart({ timeframe }: VolumeChartProps) {
-  // Mock data for volume
-  const chartData = [
+export default function VolumeChart({ timeframe, data }: VolumeChartProps) {
+  // Default mock data if no real data provided
+  const chartData = data || [
     { time: "06:00 AM", volume: 15000 },
     { time: "09:00 AM", volume: 22000 },
     { time: "12:00 PM", volume: 28000 },

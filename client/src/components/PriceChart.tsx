@@ -1,13 +1,15 @@
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { Card } from "@/components/ui/card";
+import { PricePoint } from "@/hooks/usePriceHistory";
 
 interface PriceChartProps {
   timeframe: string;
+  data?: PricePoint[];
 }
 
-export default function PriceChart({ timeframe }: PriceChartProps) {
-  // Mock data for different timeframes
-  const chartData = [
+export default function PriceChart({ timeframe, data }: PriceChartProps) {
+  // Default mock data if no real data provided
+  const chartData = data || [
     { time: "06:00 AM", price: 78500, volume: 45000 },
     { time: "09:00 AM", price: 79200, volume: 52000 },
     { time: "12:00 PM", price: 80100, volume: 58000 },
