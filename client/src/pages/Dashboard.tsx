@@ -1,4 +1,3 @@
-import { useState, useMemo } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { RefreshCw, AlertCircle } from "lucide-react";
@@ -9,6 +8,7 @@ import ActivityTable from "@/components/ActivityTable";
 import Sidebar from "@/components/Sidebar";
 import ConnectionStatus from "@/components/ConnectionStatus";
 import ExchangeSelector from "@/components/ExchangeSelector";
+import { useState, useMemo } from "react";
 import { useCryptoData } from "@/hooks/useCryptoData";
 import { useTradeData } from "@/hooks/useTradeData";
 import { usePriceHistory } from "@/hooks/usePriceHistory";
@@ -17,6 +17,7 @@ import { useTradeWebSocket } from "@/hooks/useTradeWebSocket";
 import { useCoinbaseWebSocket } from "@/hooks/useCoinbaseWebSocket";
 import { useBinance24hStats } from "@/hooks/useBinance24hStats";
 import { useBinanceBuySellVolume } from "@/hooks/useBinanceBuySellVolume";
+import { useBinanceKlinesVolume } from "@/hooks/useBinanceKlinesVolume";
 
 export default function Dashboard() {
   const [selectedTimeframe, setSelectedTimeframe] = useState("1D");
@@ -32,6 +33,9 @@ export default function Dashboard() {
   // Fetch Binance buy/sell volume from recent trades
   const { volumeData: buySellVolume, loading: volumeLoading, error: volumeError, refetch: refetchBuySellVolume } = useBinanceBuySellVolume("BTCUSDT");
 
+  // Fetch Binance klines volume data (5m, 15m, 30m, 1h, 12h, 24h)
+  const { volumes: klinesVolumes, loading: klinesLoading, error: klinesError, refetch: refetchKlinesVolumes } = useBinanceKlinesVolume("BTCUSDT");
+
   // Fetch trade data via REST API (fallback)
   const { trades: restTradeData, loading: tradesLoading, error: tradesError, refetch: refetchTrades } = useTradeData("BTCUSDT");
 
@@ -43,7 +47,26 @@ export default function Dashboard() {
   const { priceData: wsPriceData, connected: priceConnected, error: priceWsError } = useBinanceWebSocket("btcusdt");
   const { trades: wsTrades, stats: wsStats, connected: tradeConnected, error: tradeWsError } = useTradeWebSocket("btcusdt");
 
-  const timeframes = ["1M", "5M", "15M", "30M", "1H", "4H", "1D"];
+  // Map selected timeframe to klines timeframe
+  const getKlinesTimeframe = (tf: string): "5m" | "15m" | "30m" | "1h" | "12h" | "24h" => {
+    switch (tf) {
+      case "5M":
+        return "5m";
+      case "15M":
+        return "15m";
+      case "30M":
+        return "30m";
+      case "1H":
+        return "1h";
+      case "4H":
+      case "12H":
+        return "12h";
+      default:
+        return "24h";
+    }
+  };
+
+  const timeframes = ["5M", "15M", "30M", "1H", "12H", "1D"];
 
   // Mock large activity data
   const largeActivityData = [
@@ -83,20 +106,20 @@ export default function Dashboard() {
       volume24h: binance24hStats?.volume || cryptoData?.volume24h || 0,
       high24h: binance24hStats?.highPrice || cryptoData?.high24h || 0,
       low24h: binance24hStats?.lowPrice || cryptoData?.low24h || 0,
-      buyWorth24h: buySellVolume?.buyVolumeUSD || 85101118,
-      buyVolumeBTC: buySellVolume?.buyVolumeBTC || 1056.71,
-      sellWorth24h: buySellVolume?.sellVolumeUSD || 80624129,
-      sellVolumeBTC: buySellVolume?.sellVolumeBTC || 1001.13,
-      buyPct: buySellVolume?.buyPct || 51.4,
-      sellPct: buySellVolume?.sellPct || 48.6,
+      buyWorth24h: klinesVolumes?.[getKlinesTimeframe(selectedTimeframe)]?.buyVolumeUSDT || buySellVolume?.buyVolumeUSD || 85101118,
+      buyVolumeBTC: klinesVolumes?.[getKlinesTimeframe(selectedTimeframe)]?.buyVolumeBTC || buySellVolume?.buyVolumeBTC || 1056.71,
+      sellWorth24h: klinesVolumes?.[getKlinesTimeframe(selectedTimeframe)]?.sellVolumeUSDT || buySellVolume?.sellVolumeUSD || 80624129,
+      sellVolumeBTC: klinesVolumes?.[getKlinesTimeframe(selectedTimeframe)]?.sellVolumeBTC || buySellVolume?.sellVolumeBTC || 1001.13,
+      buyPct: klinesVolumes?.[getKlinesTimeframe(selectedTimeframe)]?.buyPct || buySellVolume?.buyPct || 51.4,
+      sellPct: klinesVolumes?.[getKlinesTimeframe(selectedTimeframe)]?.sellPct || buySellVolume?.sellPct || 48.6,
     };
-  }, [selectedExchange, coinbaseTickerData, wsPriceData, cryptoData, binance24hStats, buySellVolume]);
+  }, [selectedExchange, selectedTimeframe, coinbaseTickerData, wsPriceData, cryptoData, binance24hStats, buySellVolume, klinesVolumes]);
 
   // Use WebSocket trade data if available, otherwise use REST API data
   const displayTradeData = wsTrades.length > 0 ? restTradeData : restTradeData;
 
   // Show loading state
-  if ((cryptoLoading || binanceStatsLoading || volumeLoading) && !coinbaseTickerData && !wsPriceData) {
+  if ((cryptoLoading || binanceStatsLoading || volumeLoading || klinesLoading) && !coinbaseTickerData && !wsPriceData) {
     return (
       <div className="flex h-screen bg-background text-foreground items-center justify-center">
         <div className="text-center">
@@ -156,6 +179,7 @@ export default function Dashboard() {
                   refetchCrypto();
                   refetchBinanceStats();
                   refetchBuySellVolume();
+                  refetchKlinesVolumes();
                 }}
                 className="gap-2"
               >
@@ -215,14 +239,14 @@ export default function Dashboard() {
                   <p className="text-xl font-bold text-green-500">${displayData.buyWorth24h.toLocaleString()} USD</p>
                   <p className="text-sm text-muted-foreground mt-1">{displayData.buyVolumeBTC.toFixed(2)} BTC</p>
                   <p className="text-xs text-muted-foreground mt-2">{displayData.buyPct.toFixed(2)}%</p>
-                  {volumeLoading && <p className="text-xs text-yellow-500 mt-2">Loading...</p>}
+                  {(volumeLoading || klinesLoading) && <p className="text-xs text-yellow-500 mt-2">Loading...</p>}
                 </Card>
                 <Card className="p-4 bg-card border-border">
                   <p className="text-xs text-muted-foreground mb-2">24h Sell Worth</p>
                   <p className="text-xl font-bold text-red-500">${displayData.sellWorth24h.toLocaleString()} USD</p>
                   <p className="text-sm text-muted-foreground mt-1">{displayData.sellVolumeBTC.toFixed(2)} BTC</p>
                   <p className="text-xs text-muted-foreground mt-2">{displayData.sellPct.toFixed(2)}%</p>
-                  {volumeLoading && <p className="text-xs text-yellow-500 mt-2">Loading...</p>}
+                  {(volumeLoading || klinesLoading) && <p className="text-xs text-yellow-500 mt-2">Loading...</p>}
                 </Card>
               </div>
 
@@ -244,7 +268,7 @@ export default function Dashboard() {
                       ))}
                     </div>
                   </div>
-                  {historyLoading ? (
+                  {historyLoading || klinesLoading ? (
                     <Card className="p-8 bg-card border-border text-center">
                       <p className="text-muted-foreground">Loading chart data...</p>
                     </Card>
