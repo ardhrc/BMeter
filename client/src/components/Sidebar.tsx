@@ -1,9 +1,11 @@
-import { BarChart3, TrendingUp, Activity, Settings, Home, Bell, Zap, Eye } from "lucide-react";
+import { BarChart3, TrendingUp, Activity, Settings, Home, Bell, Zap, Eye, Bug } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useLocation } from "wouter";
 
 export default function Sidebar() {
+  const [location, setLocation] = useLocation();
   const navItems = [
-    { icon: Home, label: "Dashboard", active: true },
+    { icon: Home, label: "Dashboard", active: location === "/" },
     { icon: TrendingUp, label: "Whale Trades" },
     { icon: Activity, label: "Liquidations" },
     { icon: BarChart3, label: "Volume Flow" },
@@ -31,6 +33,7 @@ export default function Sidebar() {
             key={item.label}
             variant={item.active ? "default" : "ghost"}
             className="w-full justify-start gap-3"
+            onClick={() => item.label === "Dashboard" && setLocation("/")}
           >
             <item.icon className="w-4 h-4" />
             {item.label}
@@ -39,10 +42,18 @@ export default function Sidebar() {
       </nav>
 
       {/* Footer */}
-      <div className="p-4 border-t border-border">
+      <div className="p-4 border-t border-border space-y-2">
         <Button variant="outline" className="w-full justify-start gap-3">
           <Settings className="w-4 h-4" />
           Settings
+        </Button>
+        <Button
+          variant={location === "/debug/klines" ? "default" : "outline"}
+          className="w-full justify-start gap-3 text-xs"
+          onClick={() => setLocation("/debug/klines")}
+        >
+          <Bug className="w-4 h-4" />
+          Debug Klines
         </Button>
       </div>
     </div>
