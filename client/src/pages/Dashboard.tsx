@@ -8,6 +8,7 @@ import ActivityTable from "@/components/ActivityTable";
 import Sidebar from "@/components/Sidebar";
 import ConnectionStatus from "@/components/ConnectionStatus";
 import ExchangeSelector from "@/components/ExchangeSelector";
+import KlinesDataDisplay from "@/components/KlinesDataDisplay";
 import { useState, useMemo } from "react";
 import { useCryptoData } from "@/hooks/useCryptoData";
 import { useTradeData } from "@/hooks/useTradeData";
@@ -313,6 +314,9 @@ export default function Dashboard() {
           {/* Activity Tables */}
           <div className="px-6 pb-6 space-y-6">
             <ActivityTable title="Large Activity" subtitle="Filtered by potentially whale trades" data={largeActivityData} />
+            
+            {/* Klines Data Display */}
+            <KlinesDataDisplay symbol="BTCUSDT" />
           </div>
         </div>
       </div>
