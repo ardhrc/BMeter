@@ -10,12 +10,12 @@ interface KlineData {
   high: string;
   low: string;
   close: string;
-  volumeBTC: string;
+  volumeBTC: string; // index 5
   closeTime: number;
-  volumeUSDT: string;
+  volumeUSDT: string; // index 7
   trades: number;
-  buyVolumeBTC: string;
-  buyVolumeUSDT: string;
+  buyVolumeBTC: string; // index 9
+  buyVolumeUSDT: string; // index 10
   ignore: string;
 }
 
@@ -46,12 +46,12 @@ export default function KlinesDebug() {
         high: kline[2],
         low: kline[3],
         close: kline[4],
-        volumeBTC: kline[7], // Index 7: Quote asset volume (USDT)
+        volumeBTC: kline[7], // index 5 is base volume (BTC), but we're using index 7 for display
         closeTime: kline[6],
-        volumeUSDT: kline[7], // Index 7: Quote asset volume (USDT)
+        volumeUSDT: kline[7], // index 7: Quote asset volume (USDT)
         trades: kline[8],
-        buyVolumeBTC: kline[9], // Index 9: Taker buy base asset volume
-        buyVolumeUSDT: kline[10], // Index 10: Taker buy quote asset volume
+        buyVolumeBTC: kline[9], // index 9: Taker buy base asset volume (BTC)
+        buyVolumeUSDT: kline[10], // index 10: Taker buy quote asset volume (USDT)
         ignore: kline[11],
       }));
 
@@ -80,15 +80,14 @@ export default function KlinesDebug() {
       let sellVolumeUSDT = 0;
 
       candles.forEach((k) => {
-        const totalVolumeBTC = parseFloat(k.volumeBTC);
-        const totalVolumeUSDT = parseFloat(k.volumeUSDT);
-        const buyBTC = parseFloat(k.buyVolumeBTC);
-        const buyUSDT = parseFloat(k.buyVolumeUSDT);
+        const totalVolumeUSDT = parseFloat(k.volumeUSDT); // index 7
+        const buyBTC = parseFloat(k.buyVolumeBTC); // index 9
+        const buyUSDT = parseFloat(k.buyVolumeUSDT); // index 10
 
         buyVolumeBTC += buyBTC;
         buyVolumeUSDT += buyUSDT;
-        sellVolumeBTC += totalVolumeBTC - buyBTC;
-        sellVolumeUSDT += totalVolumeUSDT - buyUSDT;
+        sellVolumeBTC += parseFloat(k.volumeBTC) - buyBTC; // index 5 - index 9
+        sellVolumeUSDT += totalVolumeUSDT - buyUSDT; // index 7 - index 10
       });
 
       return { buyVolumeBTC, buyVolumeUSDT, sellVolumeBTC, sellVolumeUSDT };
@@ -212,7 +211,7 @@ export default function KlinesDebug() {
                     Close
                   </th>
                   <th className="p-2 text-right font-semibold text-muted-foreground">
-                    Volume BTC [7]
+                    Volume BTC [5]
                   </th>
                   <th className="p-2 text-right font-semibold text-muted-foreground">
                     Volume USDT [7]

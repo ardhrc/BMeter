@@ -48,13 +48,13 @@ export function useBinanceKlinesVolume(symbol: string = "BTCUSDT") {
         let sellVolumeUSDT = 0;
 
         candles.forEach((kline: any[]) => {
-          // According to Binance klines format:
-          // [5] = Volume (BTC) - total volume in base asset
-          // [7] = Quote asset volume (USDT) - total volume in quote asset
-          // [9] = Taker buy base asset volume (BTC) - buy volume in base asset
-          // [10] = Taker buy quote asset volume (USDT) - buy volume in quote asset
+          // Correct indices according to Binance klines format:
+          // [5] = Base asset volume (BTC)
+          // [7] = Quote asset volume (USDT)
+          // [9] = Taker buy base asset volume (BTC)
+          // [10] = Taker buy quote asset volume (USDT)
 
-          const totalVolumeBTC = parseFloat(kline[7]); // index 7 is total volume
+          const totalVolumeBTC = parseFloat(kline[7]); // index 7 is quote asset volume
           const totalVolumeUSDT = parseFloat(kline[7]); // index 7 is quote asset volume
           const buyVolumeBTCKline = parseFloat(kline[9]); // index 9 is taker buy base volume
           const buyVolumeUSDTKline = parseFloat(kline[10]); // index 10 is taker buy quote volume
