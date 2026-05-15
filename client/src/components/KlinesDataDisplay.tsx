@@ -48,7 +48,7 @@ export default function KlinesDataDisplay({ symbol = "BTCUSDT" }) {
         high: kline[2],
         low: kline[3],
         close: kline[4],
-        volumeBTC: kline[7],
+        volumeBTC: kline[5],
         volumeUSDT: kline[7],
         trades: kline[8],
         buyVolumeBTC: kline[9],

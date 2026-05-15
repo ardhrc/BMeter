@@ -54,7 +54,7 @@ export function useBinanceKlinesVolume(symbol: string = "BTCUSDT") {
           // [9] = Taker buy base asset volume (BTC)
           // [10] = Taker buy quote asset volume (USDT)
 
-          const totalVolumeBTC = parseFloat(kline[7]); // index 7 is quote asset volume
+          const totalVolumeBTC = parseFloat(kline[5]); // index 5 is base asset volume
           const totalVolumeUSDT = parseFloat(kline[7]); // index 7 is quote asset volume
           const buyVolumeBTCKline = parseFloat(kline[9]); // index 9 is taker buy base volume
           const buyVolumeUSDTKline = parseFloat(kline[10]); // index 10 is taker buy quote volume
