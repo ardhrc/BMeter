@@ -116,21 +116,7 @@ export default function Dashboard() {
     };
   }, [selectedExchange, selectedTimeframe, coinbaseTickerData, wsPriceData, cryptoData, binance24hStats, buySellVolume, klinesVolumes]);
 
-  // Show loading state for klines volumes
-  if (klinesLoading && !klinesVolumes) {
-    return (
-      <div className="flex h-screen bg-background text-foreground items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin mb-4">
-            <RefreshCw className="w-8 h-8 text-cyan-500 mx-auto" />
-          </div>
-          <p className="text-lg font-semibold">Loading volume data...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Convert klines volumes to TradeUpdates format
+  // Convert klines volumes to TradeUpdates format (must be before conditional returns)
   const displayKlinesVolumes = useMemo(() => {
     if (!klinesVolumes) return [];
     return [
@@ -142,6 +128,20 @@ export default function Dashboard() {
       klinesVolumes["24h"],
     ];
   }, [klinesVolumes]);
+
+  // Show loading state for klines volumes
+  if ((klinesLoading || binanceStatsLoading || volumeLoading) && !klinesVolumes) {
+    return (
+      <div className="flex h-screen bg-background text-foreground items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin mb-4">
+            <RefreshCw className="w-8 h-8 text-cyan-500 mx-auto" />
+          </div>
+          <p className="text-lg font-semibold">Loading volume data...</p>
+        </div>
+      </div>
+    );
+  }
 
   // Show loading state
   if ((cryptoLoading || binanceStatsLoading || volumeLoading || klinesLoading) && !coinbaseTickerData && !wsPriceData) {
