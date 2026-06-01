@@ -116,8 +116,32 @@ export default function Dashboard() {
     };
   }, [selectedExchange, selectedTimeframe, coinbaseTickerData, wsPriceData, cryptoData, binance24hStats, buySellVolume, klinesVolumes]);
 
-  // Use WebSocket trade data if available, otherwise use REST API data
-  const displayTradeData = wsTrades.length > 0 ? restTradeData : restTradeData;
+  // Show loading state for klines volumes
+  if (klinesLoading && !klinesVolumes) {
+    return (
+      <div className="flex h-screen bg-background text-foreground items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin mb-4">
+            <RefreshCw className="w-8 h-8 text-cyan-500 mx-auto" />
+          </div>
+          <p className="text-lg font-semibold">Loading volume data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Convert klines volumes to TradeUpdates format
+  const displayKlinesVolumes = useMemo(() => {
+    if (!klinesVolumes) return [];
+    return [
+      klinesVolumes["5m"],
+      klinesVolumes["15m"],
+      klinesVolumes["30m"],
+      klinesVolumes["1h"],
+      klinesVolumes["12h"],
+      klinesVolumes["24h"],
+    ];
+  }, [klinesVolumes]);
 
   // Show loading state
   if ((cryptoLoading || binanceStatsLoading || volumeLoading || klinesLoading) && !coinbaseTickerData && !wsPriceData) {
@@ -297,16 +321,16 @@ export default function Dashboard() {
 
             {/* Right Column - Live Trades */}
             <div>
-              {tradesLoading && displayTradeData.length === 0 ? (
+              {klinesLoading && displayKlinesVolumes.length === 0 ? (
                 <Card className="bg-card border-border p-4 h-full flex items-center justify-center">
-                  <p className="text-muted-foreground">Loading trade data...</p>
+                  <p className="text-muted-foreground">Loading volume data...</p>
                 </Card>
-              ) : tradesError && displayTradeData.length === 0 ? (
+              ) : klinesError && displayKlinesVolumes.length === 0 ? (
                 <Card className="bg-card border-border p-4">
-                  <p className="text-red-500 text-sm">{tradesError}</p>
+                  <p className="text-red-500 text-sm">{klinesError}</p>
                 </Card>
               ) : (
-                <TradeUpdates trades={displayTradeData} wsActive={tradeConnected} />
+                <TradeUpdates volumes={displayKlinesVolumes} wsActive={tradeConnected} />
               )}
             </div>
           </div>

@@ -1,22 +1,22 @@
 import { Card } from "@/components/ui/card";
 import { TrendingUp, TrendingDown, Zap } from "lucide-react";
 
-interface Trade {
-  timeframe: string;
-  bought: number;
-  sold: number;
-  buyUSD: number;
-  sellUSD: number;
+interface KlineVolume {
+  timeframe: "5m" | "15m" | "30m" | "1h" | "12h" | "24h";
+  buyVolumeBTC: number;
+  buyVolumeUSDT: number;
+  sellVolumeBTC: number;
+  sellVolumeUSDT: number;
   buyPct: number;
   sellPct: number;
 }
 
 interface TradeUpdatesProps {
-  trades: Trade[];
+  volumes: KlineVolume[];
   wsActive?: boolean;
 }
 
-export default function TradeUpdates({ trades, wsActive = false }: TradeUpdatesProps) {
+export default function TradeUpdates({ volumes, wsActive = false }: TradeUpdatesProps) {
   return (
     <Card className="bg-card border-border p-4 h-full flex flex-col">
       <div className="flex items-center gap-2 mb-4">
@@ -30,12 +30,12 @@ export default function TradeUpdates({ trades, wsActive = false }: TradeUpdatesP
       </div>
 
       <div className="flex-1 overflow-y-auto space-y-4">
-        {trades.map((trade, idx) => (
+        {volumes.map((volume, idx) => (
           <div key={idx} className="border-b border-border pb-4 last:border-b-0">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium">{trade.timeframe}</span>
+              <span className="text-sm font-medium uppercase">{volume.timeframe}</span>
               <span className="text-xs text-muted-foreground">
-                BOUGHT: {trade.bought.toFixed(2)} BTC | SOLD: {trade.sold.toFixed(2)} BTC
+                BUY: {volume.buyVolumeBTC.toFixed(2)} BTC | SELL: {volume.sellVolumeBTC.toFixed(2)} BTC
               </span>
             </div>
 
@@ -46,13 +46,13 @@ export default function TradeUpdates({ trades, wsActive = false }: TradeUpdatesP
                 <div className="flex-1 bg-gray-700 rounded h-6 overflow-hidden">
                   <div
                     className="bg-green-500 h-full flex items-center justify-end pr-2 transition-all duration-300"
-                    style={{ width: `${trade.buyPct}%` }}
+                    style={{ width: `${volume.buyPct}%` }}
                   >
-                    <span className="text-xs font-bold text-white">{trade.buyPct.toFixed(1)}%</span>
+                    <span className="text-xs font-bold text-white">{volume.buyPct.toFixed(1)}%</span>
                   </div>
                 </div>
                 <span className="text-xs font-mono text-green-500 w-24 text-right">
-                  ${(trade.buyUSD / 1e6).toFixed(2)}M
+                  ${(volume.buyVolumeUSDT / 1e6).toFixed(2)}M
                 </span>
               </div>
 
@@ -61,13 +61,13 @@ export default function TradeUpdates({ trades, wsActive = false }: TradeUpdatesP
                 <div className="flex-1 bg-gray-700 rounded h-6 overflow-hidden">
                   <div
                     className="bg-red-500 h-full flex items-center justify-end pr-2 transition-all duration-300"
-                    style={{ width: `${trade.sellPct}%` }}
+                    style={{ width: `${volume.sellPct}%` }}
                   >
-                    <span className="text-xs font-bold text-white">{trade.sellPct.toFixed(1)}%</span>
+                    <span className="text-xs font-bold text-white">{volume.sellPct.toFixed(1)}%</span>
                   </div>
                 </div>
                 <span className="text-xs font-mono text-red-500 w-24 text-right">
-                  ${(trade.sellUSD / 1e6).toFixed(2)}M
+                  ${(volume.sellVolumeUSDT / 1e6).toFixed(2)}M
                 </span>
               </div>
             </div>
