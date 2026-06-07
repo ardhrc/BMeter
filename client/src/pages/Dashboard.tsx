@@ -104,7 +104,7 @@ export default function Dashboard() {
       exchange: exchangeName,
       price: Math.round(basePrice * 100) / 100,
       change24h: Math.round(baseChange * 100) / 100,
-      volume24h: binance24hStats?.volume || cryptoData?.volume24h || 0,
+      volume24h: binance24hStats?.quoteAssetVolume || cryptoData?.volume24h || 0,
       high24h: binance24hStats?.highPrice || cryptoData?.high24h || 0,
       low24h: binance24hStats?.lowPrice || cryptoData?.low24h || 0,
       buyWorth24h: klinesVolumes?.[getKlinesTimeframe(selectedTimeframe)]?.buyVolumeUSDT || buySellVolume?.buyVolumeUSD || 85101118,
